@@ -1,5 +1,5 @@
 # %%
-from ref.impala import ImpalaTrainer, DEFAULT_CONFIG
+from impala_student import ImpalaStudentTrainer, DEFAULT_CONFIG
 from atari_wrappers import register_timelimit_env
 from pathlib import Path
 

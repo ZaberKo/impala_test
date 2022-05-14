@@ -1,7 +1,7 @@
 disable_env_checking: True
 framework: torch
 num_gpus: 0.1
-num_workers: 16
+num_workers: 0 # use teacher workers instead
 num_envs_per_worker: 5
 horizon: 1000
 clip_rewards: True
@@ -22,3 +22,8 @@ timesteps_per_iteration: 500000
 log_level: DEBUG
 
 env: BreakoutNoFrameskip-v4
+
+teacher_checkpoint: "/hoem/zaber/ray_results/ImpalaTrainer_2022-05-08_01-25-34/ImpalaTrainer_SpaceInvadersNoFrameskip-v4-TimeLimit40000_b432f_00000_0_2022-05-08_01-25-35/checkpoint_000800/checkpoint-800"
+teacher_config:
+  num_envs_per_worker: 5
+  num_workers: 16
