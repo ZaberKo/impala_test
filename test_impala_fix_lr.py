@@ -1,6 +1,6 @@
 # %%
 from ref.impala import ImpalaTrainer, DEFAULT_CONFIG
-from atari_wrappers import register_timelimit_env
+from atari_wrappers import register_my_env
 from pathlib import Path
 
 from ruamel.yaml import YAML
@@ -31,7 +31,7 @@ config["timesteps_per_iteration"]=config["train_batch_size"]*iters_per_train
 
 
 config["env"]="PongNoFrameskip-v4"
-config["env"]=register_timelimit_env(config["env"],max_episode_steps=3600*5)
+config["env"]=register_my_env(config["env"],max_episode_steps=3600*5)
 
 
 

@@ -1,6 +1,6 @@
 # %%
 from impala_student import ImpalaStudentTrainer, DEFAULT_CONFIG
-from atari_wrappers import register_timelimit_env
+from atari_wrappers import register_my_env
 from pathlib import Path
 
 from ruamel.yaml import YAML
@@ -27,10 +27,8 @@ config.update(custom_config)
 config["timesteps_per_iteration"]=config["train_batch_size"]*iters_per_train
 
 
-# config["env"]="SpaceInvadersNoFrameskip-v4"
-# config["env"]="BeamRiderNoFrameskip-v4"
-# config["env"]="QbertNoFrameskip-v4"
-config["env"]=register_timelimit_env(config["env"], max_episode_steps=3600*10)
+config["preprocessor_pref"] = None
+config["env"]=register_my_env(config["env"], max_episode_steps=3600*10)
 
 
 stop = {
