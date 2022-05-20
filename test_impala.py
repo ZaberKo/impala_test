@@ -43,8 +43,9 @@ config["env"]=register_my_env(config["env"], max_episode_steps=3600*5)
 
 
 # ========= model ==============
-from visonnet import VisionNetwork
+from visonnet import VisionNetwork,VisionNetwork2
 ModelCatalog.register_custom_model("MyVisonNetwork",VisionNetwork)
+ModelCatalog.register_custom_model("MyVisonNetwork2",VisionNetwork2)
 
 
 stop = {
@@ -59,6 +60,7 @@ stop = {
 # print(summarize(config))
 # exit()
 
+# ImpalaTrainer(config)
 
 tune.run(ImpalaTrainer,config=config,stop=stop,checkpoint_freq=10)
 # results: ~/workspace/rllib-record/ImpalaTrainer_2022-04-17_19-08-00
