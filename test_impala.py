@@ -14,10 +14,7 @@ import ray
 from ray import tune
 
 
-ray.init(
-    include_dashboard=True,
-    # local_mode=True,
-    num_cpus=33,num_gpus=1)
+
 # %%
 
 config_filepath="config/atari-impala.yaml"
@@ -34,12 +31,12 @@ config["timesteps_per_iteration"]=config["train_batch_size"]*iters_per_train
 # =========== ENV =============
 
 # config["env"]="BeamRiderNoFrameskip-v4"
-# config["env"]="QbertNoFrameskip-v4"
-config["env"]="SpaceInvadersNoFrameskip-v4"
+config["env"]="QbertNoFrameskip-v4"
+# config["env"]="SpaceInvadersNoFrameskip-v4"
 
 # disable default rllib atari deepmind wrappers
 config["preprocessor_pref"] = None
-config["env"]=register_my_env(config["env"], max_episode_steps=3600*5)
+config["env"]=register_my_env(config["env"], max_episode_steps=3600*10)
 
 
 # ========= model ==============
@@ -59,8 +56,12 @@ stop = {
 
 # print(summarize(config))
 # exit()
+cpus=config["num_workers"]+config["evaluation_num_workers"]+1
 
-# ImpalaTrainer(config)
+ray.init(
+    include_dashboard=True,
+    # local_mode=True,
+    num_cpus=cpus,num_gpus=1)
 
 tune.run(ImpalaTrainer,config=config,stop=stop,checkpoint_freq=10)
 # results: ~/workspace/rllib-record/ImpalaTrainer_2022-04-17_19-08-00
