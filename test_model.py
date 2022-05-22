@@ -5,7 +5,7 @@ from pathlib import Path
 from ref.impala import ImpalaTrainer, DEFAULT_CONFIG
 from ray.rllib.utils import merge_dicts
 yaml=YAML(typ="safe")
-config_filepath="config/atari-impala.yaml"
+config_filepath="config/atari-impala-old.yaml"
 custom_config=yaml.load(Path(config_filepath))
 
 config=merge_dicts(DEFAULT_CONFIG.copy(),custom_config)
@@ -15,9 +15,6 @@ config=merge_dicts(DEFAULT_CONFIG.copy(),custom_config)
 
 
 # %%
-from ref.visonnet import VisionNetwork as _VisionNetwork
-import ray.rllib.models.torch.visionnet
-ray.rllib.models.torch.visionnet.VisionNetwork=_VisionNetwork
 from ray.rllib.models import ModelCatalog
 
 
@@ -52,6 +49,33 @@ model=ModelCatalog.get_model_v2(
     framework="torch",
 )
 
+
+#%%
+from visonnet import VisionNetwork,VisionNetwork2
+
+
+mymodel_config=merge_dicts(DEFAULT_CONFIG.copy(),yaml.load(Path("config/atari-impala.yaml")))["model"]
+print(mymodel_config)
+from ray.rllib.models import ModelCatalog
+ModelCatalog.register_custom_model("MyVisonNetwork",VisionNetwork)
+ModelCatalog.register_custom_model("MyVisonNetwork2",VisionNetwork2)
+mymodel=ModelCatalog.get_model_v2(
+    obs_space=env.observation_space,
+    action_space=env.action_space,
+    num_outputs=env.action_space.n,
+    model_config=mymodel_config,
+    framework="torch",
+)
+
+#%%
+def calc_params(model):
+    counts=0
+    for params in model.parameters():
+        counts+=params.numel()
+    return counts
+
+print(calc_params(model))
+print(calc_params(mymodel))
 #%%
 import torch
 obs=env.reset()
@@ -60,7 +84,5 @@ print(obs.shape)
 logits=model({"obs":obs})
 value=model.value_function()
 # %%
-import inspect
 
-inspect.getsource(model.__init__)
 # %%

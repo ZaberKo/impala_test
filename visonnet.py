@@ -39,17 +39,13 @@ class VisionNetwork(TorchModelV2, nn.Module):
 
         activation = self.model_config.get("conv_activation")
         filters = self.model_config["conv_filters"]
-        assert len(
-            filters) > 0, "Must provide at least 1 entry in `conv_filters`!"
+        assert len(filters) > 0, "Must provide at least 1 entry in `conv_filters`!"
 
         # Post FC net config.
         post_fcnet_hiddens = model_config.get("post_fcnet_hiddens", [])
         post_fcnet_activation = get_activation_fn(
             model_config.get("post_fcnet_activation"), framework="torch"
         )
-
-        actor_fc_hiddens = model_config.get("actor_fc_hiddens", [])
-        critic_fc_hiddens = model_config.get("critic_fc_hiddens", [])
 
         layers = []
         (w, h, in_channels) = obs_space.shape
@@ -84,6 +80,7 @@ class VisionNetwork(TorchModelV2, nn.Module):
             )
         )
 
+
         layers.append(nn.Flatten())
         in_size = out_channels
         # Add (optional) post-fc-stack after last Conv2D layer.
@@ -92,7 +89,7 @@ class VisionNetwork(TorchModelV2, nn.Module):
                 SlimFC(
                     in_size=in_size,
                     out_size=out_size,
-                    activation_fn=post_fcnet_activation,
+                    activation_fn=post_fcnet_activation      ,
                     initializer=normc_initializer(1.0),
                 )
             )
@@ -101,52 +98,20 @@ class VisionNetwork(TorchModelV2, nn.Module):
         self._convs = nn.Sequential(*layers)
 
         # Last layer is logits layer.
-
-        actor_fc_in_size = in_size
-        actor_layers = []
-        for out_size in actor_fc_hiddens:
-            actor_layers.append(
-                SlimFC(
-                    in_size=actor_fc_in_size,
-                    out_size=out_size,
-                    activation_fn=post_fcnet_activation,
-                    initializer=normc_initializer(0.01),
-                )
-            )
-            actor_fc_in_size = out_size
-
-        actor_layers.append(SlimFC(
-            in_size=actor_fc_in_size,
+        self._logits = SlimFC(
+            in_size=in_size,
             out_size=num_outputs,
             activation_fn=None,
             initializer=normc_initializer(0.01),
-        ))
-
-        self._logits = nn.Sequential(*actor_layers)
+        )
 
         # Build the value layers
-        critic_fc_in_size = in_size
-        critic_layers = []
-        for out_size in critic_fc_hiddens:
-            critic_layers.append(
-                SlimFC(
-                    in_size=critic_fc_in_size,
-                    out_size=out_size,
-                    activation_fn=post_fcnet_activation,
-                    initializer=normc_initializer(0.01),
-                )
+        self._value_branch = SlimFC(
+                in_size, 1, initializer=normc_initializer(0.01), activation_fn=None
             )
-            critic_fc_in_size = out_size
-        critic_layers.append(SlimFC(
-            in_size=critic_fc_in_size,
-            out_size=1,
-            initializer=normc_initializer(0.01),
-            activation_fn=None
-        ))
-
-        self._value_branch = nn.Sequential(*critic_layers)
         # Holds the current "base" output (before logits layer).
         self._features = None
+
 
     @override(TorchModelV2)
     def forward(
