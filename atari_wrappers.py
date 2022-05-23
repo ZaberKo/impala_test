@@ -28,8 +28,10 @@ def register_my_env(env_name, max_episode_steps: int = None):
 
         env = FrameStack(env, 4)
         return env
-
-    new_env_name = f"{env_name}-TimeLimit{max_episode_steps}"
+    if max_episode_steps is not None:
+        new_env_name = f"{env_name}-TimeLimit{max_episode_steps}"
+    else:
+        new_env_name = env_name
     register_env(new_env_name, env_creator)
 
     return new_env_name

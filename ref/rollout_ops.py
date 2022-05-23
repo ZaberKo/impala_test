@@ -62,7 +62,7 @@ def ParallelRollouts(
     Updates the STEPS_SAMPLED_COUNTER counter in the local iterator context.
     """
 
-    # Ensure workers are initially in sync.
+    # disable it 
     # workers.sync_weights()
 
     def report_timesteps(batch):

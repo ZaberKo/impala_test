@@ -2,7 +2,7 @@ import math
 import copy
 import pickle
 from ref.impala import *
-from ref.rollout_ops import ParallelRollouts
+
 from ray.rllib.execution.common import _get_shared_metrics, _get_global_vars
 from ray.rllib.evaluation.worker_set import WorkerSet
 from ray.rllib.utils import merge_dicts
@@ -15,14 +15,12 @@ from ray.actor import ActorHandle
 
 STUDENT_DEFAULT_CONFIG = merge_dicts(DEFAULT_CONFIG, {
     "teacher_checkpoint": "",
-    "teacher_config": {
-        "num_workers": 1,
-        "num_envs_per_worker": 1,
-    },
+    "teacher_workers_frac": 1.0
 })
 
 
 def gather_experiences_directly(workers, config):
+    from ref.rollout_ops import ParallelRollouts
     rollouts = ParallelRollouts(
         workers,
         mode="async",
@@ -100,7 +98,7 @@ class ImpalaStudentTrainer(ImpalaTrainer):
         teacher_worker_state_ref = ray.put(teacher_worker_state)
 
         self.num_teacher_workers = math.floor(
-            len(self.workers.remote_workers())*0.5)
+            len(self.workers.remote_workers())*self.config["teacher_workers_frac"])
 
         self.teacher_workers_set = {
             w
@@ -353,46 +351,3 @@ class ImpalaStudentTrainer(ImpalaTrainer):
         return StandardMetricsReporting(merged_op, workers, config) \
             .for_each(learner_thread.add_learner_metrics) \
             .for_each(reset_trained_timesteps)
-
-    @classmethod
-    def default_resource_request(cls, config):
-        cf = dict(cls.get_default_config(), **config)
-
-        eval_config = cf["evaluation_config"]
-
-        teacher_config = cf["teacher_config"]
-
-        # Return PlacementGroupFactory containing all needed resources
-        # (already properly defined as device bundles).
-        return PlacementGroupFactory(
-            bundles=[{
-                # Driver + Aggregation Workers:
-                # Force to be on same node to maximize data bandwidth
-                # between aggregation workers and the learner (driver).
-                # Aggregation workers tree-aggregate experiences collected
-                # from RolloutWorkers (n rollout workers map to m
-                # aggregation workers, where m < n) and always use 1 CPU
-                # each.
-                "CPU": cf["num_cpus_for_driver"] +
-                cf["num_aggregation_workers"],
-                "GPU": 0 if cf["_fake_gpus"] else cf["num_gpus"],
-            }] + [
-                {
-                    # RolloutWorkers on teacher workers
-                    "CPU": teacher_config.get("num_cpus_per_worker",
-                                              cf["num_cpus_per_worker"]),
-                    "GPU": teacher_config.get("num_gpus_per_worker",
-                                              cf["num_gpus_per_worker"]),
-                } for _ in range(teacher_config["num_workers"])
-            ] + ([
-                {
-                    # Evaluation (remote) workers.
-                    # Note: The local eval worker is located on the driver
-                    # CPU or not even created iff >0 eval workers.
-                    "CPU": eval_config.get("num_cpus_per_worker",
-                                           cf["num_cpus_per_worker"]),
-                    "GPU": eval_config.get("num_gpus_per_worker",
-                                           cf["num_gpus_per_worker"]),
-                } for _ in range(cf["evaluation_num_workers"])
-            ] if cf["evaluation_interval"] else []),
-            strategy=config.get("placement_strategy", "PACK"))

@@ -1,5 +1,5 @@
 # %%
-from impala_student import ImpalaStudentTrainer, STUDENT_DEFAULT_CONFIG
+from impala_student2 import ImpalaStudentTrainer, STUDENT_DEFAULT_CONFIG
 from atari_wrappers import register_my_env
 from pathlib import Path
 
@@ -13,7 +13,7 @@ ray.init(
     num_cpus=33,num_gpus=1)
 # %%
 
-config_filepath="config/atari-impala-teacher.yaml"
+config_filepath="config/atari-impala-teacher2.yaml"
 iters_per_train=100
 
 config = STUDENT_DEFAULT_CONFIG.copy()
@@ -28,7 +28,7 @@ config["timesteps_per_iteration"]=config["train_batch_size"]*iters_per_train
 
 
 config["preprocessor_pref"] = None
-config["env"]=register_my_env(config["env"], max_episode_steps=3600*10)
+config["env"]=register_my_env(config["env"], max_episode_steps=None)
 
 
 stop = {
