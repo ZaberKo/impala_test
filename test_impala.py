@@ -31,8 +31,8 @@ config["timesteps_per_iteration"]=config["train_batch_size"]*iters_per_train
 # =========== ENV =============
 
 # config["env"]="BeamRiderNoFrameskip-v4"
-config["env"]="QbertNoFrameskip-v4"
-# config["env"]="SpaceInvadersNoFrameskip-v4"
+# config["env"]="QbertNoFrameskip-v4"
+config["env"]="SpaceInvadersNoFrameskip-v4"
 
 # disable default rllib atari deepmind wrappers
 config["preprocessor_pref"] = None

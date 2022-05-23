@@ -3,7 +3,6 @@ framework: torch
 num_gpus: 0.1
 num_workers: 16
 num_envs_per_worker: 5
-# horizon: 1000
 horizon: null
 clip_rewards: True
 evaluation_num_workers: 16
@@ -20,13 +19,11 @@ num_multi_gpu_tower_stacks: 4
 lr_schedule: [[0, 0.0005], [50000000, 0.000000000001]]
 min_time_s_per_reporting: null # to disable original setting
 timesteps_per_iteration: 500000
-log_level: INFO
+log_level: DEBUG
 
-env: BreakoutNoFrameskip-v4
+env: SpaceInvadersNoFrameskip-v4
 
-model:
-    post_fcnet_hiddens: [512,]
-    custom_model: "MyVisonNetwork2"
-    custom_model_config:
-        actor_fc_hiddens: [64,64]
-        critic_fc_hiddens: [64,64]
+teacher_checkpoint: "/home/zaber/ray_results/ImpalaTrainer_2022-05-08_01-25-34/ImpalaTrainer_SpaceInvadersNoFrameskip-v4-TimeLimit40000_b432f_00000_0_2022-05-08_01-25-35/checkpoint_000800/checkpoint-800"
+teacher_workers_frac: 0.5
+
+
