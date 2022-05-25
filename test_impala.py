@@ -36,7 +36,7 @@ config["env"]="SpaceInvadersNoFrameskip-v4"
 
 # disable default rllib atari deepmind wrappers
 config["preprocessor_pref"] = None
-config["env"]=register_my_env(config["env"], max_episode_steps=3600*10)
+config["env"]=register_my_env(config["env"], max_episode_steps=None)
 
 
 # ========= model ==============

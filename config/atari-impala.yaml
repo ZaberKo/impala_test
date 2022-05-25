@@ -24,9 +24,9 @@ log_level: INFO
 
 env: BreakoutNoFrameskip-v4
 
-model:
-    post_fcnet_hiddens: [512,]
-    custom_model: "MyVisonNetwork2"
-    custom_model_config:
-        actor_fc_hiddens: [64,64]
-        critic_fc_hiddens: [64,64]
+# model:
+#     post_fcnet_hiddens: [512,]
+#     custom_model: "MyVisonNetwork2"
+#     custom_model_config:
+#         actor_fc_hiddens: [64,64]
+#         critic_fc_hiddens: [64,64]

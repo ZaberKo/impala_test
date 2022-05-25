@@ -42,14 +42,6 @@ def gather_experiences_directly(workers, config):
     return train_batches
 
 
-class UpdateGlobalVars:
-    def __init__(self, workers):
-        self.workers = workers
-
-    def __call__(self, item):
-        # Update global vars of the local worker of student worker.
-        self.workers.local_worker().set_global_vars(_get_global_vars())
-
 class BroadcastUpdateLearnerWeights:
     def __init__(self, learner_thread, workers,exclude_workers_set, broadcast_interval):
         self.learner_thread = learner_thread
@@ -308,7 +300,8 @@ class ImpalaStudentTrainer(ImpalaTrainer):
         if workers.remote_workers():
             enqueue_op = enqueue_op.zip_with_source_actor() \
                 .for_each(BroadcastUpdateLearnerWeights(
-                    learner_thread, workers, teacher_workers_set,
+                    learner_thread, workers, 
+                    exclude_workers_set=teacher_workers_set,
                     broadcast_interval=config["broadcast_interval"]))
 
         # update timestep for schedulers
